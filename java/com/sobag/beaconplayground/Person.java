@@ -48,8 +48,8 @@ public class Person {
 
     @Override
     public String toString() {
-        return "Person [name=" + email + ", country=" + password + ", twitter="
-                + phonenumber + ", username=" + username + ", datetime=" + formattedDate + " ]";
+        return "Person [UserId :" + 12 + ", UserName=" + username + ", UserPasswrod="
+                + password + ", UserEmail=" + email +", UserTelephone=" + phonenumber + ", UserRegisteredTime=" + formattedDate + " ]";
     }
 
 

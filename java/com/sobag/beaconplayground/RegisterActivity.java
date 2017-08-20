@@ -132,7 +132,7 @@ public class RegisterActivity extends Activity implements OnClickListener {
                 if(!validate())
                     Toast.makeText(getBaseContext(), "Enter some data!", Toast.LENGTH_LONG).show();
                 // call AsynTask to perform network operation on separate thread
-                new HttpAsyncTask().execute("http://bconwebapi.azurewebsites.net/api/Account/Register",txtRegisterEmail.getText().toString(),txtRegisterPassword.getText().toString(),txtRegisterPhoneNumber.getText().toString());
+                new HttpAsyncTask().execute("http://bconwebapi.azurewebsites.net/api/User",txtRegisterEmail.getText().toString(),txtRegisterPassword.getText().toString(),txtRegisterPhoneNumber.getText().toString());
                 break;
         }
 
@@ -199,7 +199,7 @@ public class RegisterActivity extends Activity implements OnClickListener {
 
 
 
-        /*btnRegister.setOnClickListener(new View.OnClickListener() {
+      /*  btnRegister.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View arg0) {
                 String email = txtRegisterEmail.getText().toString();
@@ -221,4 +221,5 @@ public class RegisterActivity extends Activity implements OnClickListener {
             }
         });
     }
-}*/
+}
+*/
