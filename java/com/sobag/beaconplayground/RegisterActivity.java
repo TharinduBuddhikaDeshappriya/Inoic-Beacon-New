@@ -1,7 +1,10 @@
 package com.sobag.beaconplayground;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Intent;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import android.os.Bundle;
 import android.os.StrictMode;
 import android.util.Log;
@@ -34,11 +37,12 @@ import android.os.Bundle;
 public class RegisterActivity extends Activity implements OnClickListener {
 
     private static final String LOG_TAG = "RegisterActivity";
-
-    TextView txtRegisterEmail, txtRegisterPassword, txtRegisterPhoneNumber, txtRegisterUsername;
+    TextView txtRegisterEmail, txtRegisterPassword, txtRegisterPhoneNumber, txtConfirmPassword;
     Button btnRegister;
+    String url = "http://reacon.azurewebsites.net/api/Account/Register";
+    Person person = new Person();
 
-    Person person;
+
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -46,21 +50,16 @@ public class RegisterActivity extends Activity implements OnClickListener {
 
         txtRegisterEmail = (TextView) findViewById(R.id.txtRegisterEmail);
         txtRegisterPassword = (TextView) findViewById(R.id.txtRegisterPassword);
+        txtConfirmPassword = (TextView) findViewById(R.id.txtConfirmPassword);
         txtRegisterPhoneNumber = (TextView) findViewById(R.id.txtRegisterPhoneNumber);
-        txtRegisterUsername = (TextView) findViewById(R.id.txtRegisterUsername);
         btnRegister = (Button) findViewById(R.id.btnRegister);
 
         btnRegister.setOnClickListener(this);
 
-
-        String email = txtRegisterEmail.getText().toString();
-        String password = txtRegisterPassword.getText().toString();
-        String phonenumber = txtRegisterPhoneNumber.getText().toString();
-        String username = txtRegisterUsername.getText().toString();
-
-        Calendar c = Calendar.getInstance();
-        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        String formattedDate = df.format(c.getTime());
+       // String email = txtRegisterEmail.getText().toString();
+       // String password = txtRegisterPassword.getText().toString();
+       // String phonenumber = txtRegisterPhoneNumber.getText().toString();
+       // String username = txtRegisterUsername.getText().toString();
     }
 
     public static String POST(String url, Person person){
@@ -76,14 +75,12 @@ public class RegisterActivity extends Activity implements OnClickListener {
 
             String json = "";
 
-
             // 3. build jsonObject
             JSONObject jsonObject = new JSONObject();
-            jsonObject.accumulate("Email", person.getEmail());
+            jsonObject.accumulate("UserName", person.getEmail());
             jsonObject.accumulate("Password", person.getPassword());
+            jsonObject.accumulate("ConfirmPassword", person.getConfirmpassword());
             jsonObject.accumulate("PhoneNumber", person.getPhonenumber());
-            jsonObject.accumulate("Username", person.getUsername());
-
 
             // 4. convert JSONObject to JSON to String
             json = jsonObject.toString();
@@ -111,10 +108,13 @@ public class RegisterActivity extends Activity implements OnClickListener {
 
 
             // 10. convert inputstream to string
-            if(inputStream != null)
+            if(inputStream != null) {
                 result = convertInputStreamToString(inputStream);
-            else
+            }
+            else {
                 result = "Did not work!";
+            }
+            Log.d("InputStream", result);
 
         } catch (Exception e) {
             Log.d("InputStream", e.getLocalizedMessage());
@@ -124,6 +124,24 @@ public class RegisterActivity extends Activity implements OnClickListener {
         return result;
     }
 
+    private boolean isValidEmail(String email) {
+        String EMAIL_PATTERN = "^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@"
+                + "[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$";
+
+        Pattern pattern = Pattern.compile(EMAIL_PATTERN);
+        Matcher matcher = pattern.matcher(email);
+        return matcher.matches();
+    }
+
+    private boolean isValidPhoneNumber(String phonenumber) {
+        String PHONE_PATTERN = "^(947|07)(\\d{8})$";
+
+        Pattern pattern = Pattern.compile(PHONE_PATTERN);
+        Matcher matcher = pattern.matcher(phonenumber);
+        return matcher.matches();
+    }
+
+
 
     public void onClick(View view) {
 
@@ -131,12 +149,40 @@ public class RegisterActivity extends Activity implements OnClickListener {
             case R.id.btnRegister:
                 if(!validate())
                     Toast.makeText(getBaseContext(), "Enter some data!", Toast.LENGTH_LONG).show();
-                // call AsynTask to perform network operation on separate thread
-                new HttpAsyncTask().execute("http://bconwebapi.azurewebsites.net/api/User",txtRegisterEmail.getText().toString(),txtRegisterPassword.getText().toString(),txtRegisterPhoneNumber.getText().toString());
+
+                    person = new Person();
+                    person.setPassword(txtRegisterPassword.getText().toString()); //password
+                    person.setConfirmPassword(txtConfirmPassword.getText().toString()); // confrrm password
+                    person.setEmail(txtRegisterEmail.getText().toString().trim()); //email
+                    person.setPhonenumber(txtRegisterPhoneNumber.getText().toString()); // phoneNumber
+
+                    String email = txtRegisterEmail.getText().toString().trim();
+                    String phonenumber = txtRegisterPhoneNumber.getText().toString().trim();
+                    String password = txtRegisterPassword.getText().toString().trim();
+                    String confirmPassword = txtConfirmPassword.getText().toString().trim();
+
+                    if (!isValidEmail(email)) {
+                        txtRegisterEmail.setError("Invalid Email");
+                    }
+                    if (!isValidPhoneNumber(phonenumber)) {
+                        txtRegisterPhoneNumber.setError("Invalid Phone Number");
+                    }
+                    if (!password.equals(confirmPassword)) {
+                        txtConfirmPassword.setError("Passwords do not match");
+                    }
+
+
+
+            else {
+                    //call AsynTask to perform network operation on separate thread
+                    new HttpAsyncTask().execute(url);
+
+                }
                 break;
         }
 
     }
+
 
     public boolean isConnected(){
         ConnectivityManager connMgr = (ConnectivityManager) getSystemService(Activity.CONNECTIVITY_SERVICE);
@@ -147,17 +193,9 @@ public class RegisterActivity extends Activity implements OnClickListener {
             return false;
     }
 
-    private class HttpAsyncTask extends AsyncTask<String, String, String> {
+    private class HttpAsyncTask extends AsyncTask<String, Void, String> {
         @Override
         protected String doInBackground(String... urls) {
-
-
-
-            person = new Person();
-            person.setEmail(urls[1]); //name
-            person.setPassword(urls[2]); //country
-            person.setPhonenumber(urls[3]); // twitter
-            person.setUsername(urls[4]);
             return POST(urls[0], person);
 
         }
@@ -165,6 +203,10 @@ public class RegisterActivity extends Activity implements OnClickListener {
         @Override
         protected void onPostExecute(String result) {
             Toast.makeText(getBaseContext(), "Data Sent!", Toast.LENGTH_LONG).show();
+          Intent myIntent = new Intent(RegisterActivity.this,
+                    NavigationActivity.class);
+            startActivity(myIntent);
+
         }
     }
 
@@ -175,8 +217,6 @@ public class RegisterActivity extends Activity implements OnClickListener {
         else if(txtRegisterPassword.getText().toString().trim().equals(""))
             return false;
         else if(txtRegisterPhoneNumber.getText().toString().trim().equals(""))
-            return false;
-        else if(txtRegisterUsername.getText().toString().trim().equals(""))
             return false;
         else
             return true;
@@ -190,15 +230,8 @@ public class RegisterActivity extends Activity implements OnClickListener {
 
         inputStream.close();
         return result;
-
     }
-
-
 }
-
-
-
-
       /*  btnRegister.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View arg0) {

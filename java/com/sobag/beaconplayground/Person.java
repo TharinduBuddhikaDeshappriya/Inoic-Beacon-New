@@ -7,8 +7,10 @@ public class Person {
 
     private String email;
     private String password;
+    private String confirmpassword;
     private String phonenumber;
-    private String username;
+    private String userid = "";
+
 
     public String getEmail() {
         return email;
@@ -16,6 +18,14 @@ public class Person {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public String getUserid() {
+        return userid;
+    }
+
+    public void setUserid(String userid) {
+        this.userid = userid;
     }
 
     public String getPassword() {
@@ -26,6 +36,14 @@ public class Person {
         this.password = password;
     }
 
+    public String getConfirmpassword() {
+        return confirmpassword;
+    }
+
+    public void setConfirmPassword(String confirmpassword) {
+        this.confirmpassword = confirmpassword;
+    }
+
     public String getPhonenumber() {
         return phonenumber;
     }
@@ -34,22 +52,14 @@ public class Person {
         this.phonenumber = phonenumber;
     }
 
-    public String getUsername() {
-        return username;
-    }
 
-    public void setUsername(String username) {
-        this.username = username;
-    }
 
-    Calendar c = Calendar.getInstance();
-    SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-    String formattedDate = df.format(c.getTime());
 
     @Override
     public String toString() {
-        return "Person [UserId :" + 12 + ", UserName=" + username + ", UserPasswrod="
-                + password + ", UserEmail=" + email +", UserTelephone=" + phonenumber + ", UserRegisteredTime=" + formattedDate + " ]";
+        return "[UserId :" + userid + ",UserName=" + email +", Password="
+                + password + ",ConfirmPassword="
+                + confirmpassword + ",  PhoneNumber=" + phonenumber + "]";
     }
 
 
